@@ -1,36 +1,41 @@
 <?php
+  /**
+  * Requires the "PHP Email Form" library
+  * The "PHP Email Form" library is available only in the pro version of the template
+  * The library should be uploaded to: vendor/php-email-form/php-email-form.php
+  * For more info and help: https://bootstrapmade.com/php-email-form/
+  */
 
-if(!$_POST) exit;
+  // Replace contact@example.com with your real receiving email address
+  $receiving_email_address = 'palmholiday@gmail.com';
 
-$email = $_POST['email'];
+  if( file_exists($php_email_form = '../assets/vendor/php-email-form/php-email-form.php' )) {
+    include( $php_email_form );
+  } else {
+    die( 'Unable to load the "PHP Email Form" Library!');
+  }
 
+  $contact = new PHP_Email_Form;
+  $contact->ajax = true;
+  
+  $contact->to = $receiving_email_address;
+  $contact->from_name = $_POST['name'];
+  $contact->from_email = $_POST['email'];
+  $contact->subject = $_POST['subject'];
 
-//$error[] = preg_match('/\b[A-Z0-9._%-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/i', $_POST['email']) ? '' : 'INVALID EMAIL ADDRESS';
-if(!eregi("^[a-z0-9]+([_\\.-][a-z0-9]+)*" ."@"."([a-z0-9]+([\.-][a-z0-9]+)*)+"."\\.[a-z]{2,}"."$",$email )){
-	$error.="Invalid email address entered";
-	$errors=1;
-}
-if($errors==1) echo $error;
-else{
-	$values = array ('name','email','message');
-	$required = array('name','email','message');
-	 
-	$your_email = "palmholiday@gmail.com";
-	$email_subject = "New Message: ".$_POST['subject'];
-	$email_content = "new message:\n";
-	
-	foreach($values as $key => $value){
-	  if(in_array($value,$required)){
-		if ($key != 'subject' && $key != 'company') {
-		  if( empty($_POST[$value]) ) { echo 'PLEASE FILL IN REQUIRED FIELDS'; exit; }
-		}
-		$email_content .= $value.': '.$_POST[$value]."\n";
-	  }
-	}
-	 
-	if(@mail($your_email,$email_subject,$email_content)) {
-		echo 'Message sent!'; 
-	} else {
-		echo 'ERROR!';
-	}
-}
+  // Uncomment below code if you want to use SMTP to send emails. You need to enter your correct SMTP credentials
+  /*
+  $contact->smtp = array(
+    'host' => 'example.com',
+    'username' => 'example',
+    'password' => 'pass',
+    'port' => '587'
+  );
+  */
+
+  $contact->add_message( $_POST['name'], 'From');
+  $contact->add_message( $_POST['email'], 'Email');
+  $contact->add_message( $_POST['message'], 'Message', 10);
+
+  echo $contact->send();
+?>
